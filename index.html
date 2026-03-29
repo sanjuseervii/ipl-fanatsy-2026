@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IPL 2026 Welcome</title>
+    <style>
+        body { 
+            background-color: #0f172a; 
+            color: white; 
+            font-family: 'Segoe UI', sans-serif; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            height: 100vh; 
+            margin: 0; 
+        }
+        .welcome-card {
+            background: #1e293b;
+            padding: 40px;
+            border-radius: 16px;
+            text-align: center;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+            border: 1px solid #334155;
+            max-width: 400px;
+            width: 90%;
+        }
+        h1 { color: #fbbf24; margin-bottom: 10px; text-transform: uppercase; }
+        p { color: #94a3b8; margin-bottom: 30px; }
+        
+        .btn-group { display: flex; flex-direction: column; gap: 15px; }
+        
+        .btn {
+            padding: 15px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s, background 0.2s;
+        }
+        .btn-admin { background: #ef4444; color: white; }
+        .btn-players { background: #22c55e; color: white; }
+        
+        .btn:hover { transform: translateY(-2px); opacity: 0.9; }
+    </style>
+</head>
+<body>
+
+    <div class="welcome-card">
+        <h1>IPL 2026</h1>
+        <p>Fantasy League Portal</p>
+        
+        <div class="btn-group">
+            <button class="btn btn-players" onclick="goToPlayers()">
+                Players Dashboard
+            </button>
+
+            <button class="btn btn-admin" onclick="checkAdmin()">
+                I am Admin
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Function for Players Dashboard
+        function goToPlayers() {
+            // This opens the main display page
+            window.location.href = 'dashboard.html'; 
+        }
+
+        // Function for Admin Access
+        function checkAdmin() {
+            const password = prompt("Please enter Admin Password:");
+            
+            if (password === "12345678") {
+                alert("Access Granted!");
+                window.location.href = 'admin.html';
+            } else if (password === null) {
+                // User clicked cancel
+                return;
+            } else {
+                alert("Incorrect Password! Access Denied.");
+            }
+        }
+    </script>
+</body>
+</html>

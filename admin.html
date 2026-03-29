@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>IPL Admin Dashboard</title>
+    <style>
+        body { background-color: #0f172a; color: white; font-family: 'Segoe UI', sans-serif; padding: 20px; }
+        .container { max-width: 600px; margin: auto; background: #1e293b; padding: 25px; border-radius: 12px; border: 1px solid #334155; }
+        h1 { color: #fbbf24; text-align: center; }
+        .select-group { margin-bottom: 20px; }
+        select { width: 100%; padding: 10px; background: #0f172a; color: white; border: 1px solid #fbbf24; border-radius: 6px; }
+        .player-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #334155; }
+        input { background: #0f172a; color: #22c55e; border: 1px solid #334155; padding: 8px; border-radius: 4px; width: 80px; text-align: center; font-size: 1rem; }
+        .save-btn { width: 100%; background: #22c55e; color: white; border: none; padding: 15px; margin-top: 20px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 1.1rem; }
+        .save-btn:hover { background: #16a34a; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Manage Player Points</h1>
+    
+    <div class="select-group">
+        <label>Select Team to Edit:</label>
+        <select id="teamSelect" onchange="renderPlayers()"></select>
+    </div>
+
+    <div id="playerList">
+        </div>
+
+    <button class="save-btn" onclick="saveToStorage()">Update League Points</button>
+</div>
+
+<script>
+    // 1. Database of players based on your HTML file
+    const leagueData = JSON.parse(localStorage.getItem('iplPoints')) || {
+        "manish": { name: "@manishliftfx", players: ["MS Dhoni", "Jitesh Sharma", "Rohit Sharma", "Travis Head", "Suryakumar Yadav", "Shivam Dube", "Sam Curran", "Ayush Badoni", "Mitchell Starc", "Arshdeep Singh", "Noor Ahmed"], points: {} },
+        "riya": { name: "@riyaseerviii", players: ["Phil Salt", "Jos Buttler", "Virat Kohli", "Shubman Gill", "Rajat Patidar", "Liam Livingstone", "Glenn Maxwell", "Marcus Stoinis", "Mohammed Siraj", "Josh Hazlewood", "Pat Cummins"], points: {} },
+        "bharat": { name: "@bharath_k_sirvi", players: ["Sanju Samson", "Dhruv Jurel", "Andre Russell", "Sunil Narine", "Ravindra Jadeja", "Shreyas Iyer", "Vaibhav Suryavanshi", "Deepak Chahar", "Avesh Khan", "Yash Dayal", "Rinku Singh"], points: {} },
+        "naresh": { name: "@naresh.og", players: ["KL Rahul", "Ishan Kishan", "Yashasvi Jaiswal", "Sai Sudharsan", "Abhishek Sharma", "Hardik Pandya", "Mitchell Marsh", "Nitish Kumar Reddy", "Varun Chakravarthy", "Prasidh Krishna", "Mitchell Santner"], points: {} }
+    };
+
+    const teamSelect = document.getElementById('teamSelect');
+    const playerList = document.getElementById('playerList');
+
+    // Populate dropdown
+    Object.keys(leagueData).forEach(id => {
+        let opt = document.createElement('option');
+        opt.value = id;
+        opt.innerText = leagueData[id].name;
+        teamSelect.appendChild(opt);
+    });
+
+    function renderPlayers() {
+        const teamId = teamSelect.value;
+        const team = leagueData[teamId];
+        playerList.innerHTML = "";
+
+        team.players.forEach(player => {
+            const currentVal = team.points[player] || 0;
+            playerList.innerHTML += `
+                <div class="player-row">
+                    <span>${player}</span>
+                    <input type="number" data-player="${player}" value="${currentVal}" oninput="updateLocalVal('${teamId}', '${player}', this.value)">
+                </div>
+            `;
+        });
+    }
+
+    function updateLocalVal(teamId, player, val) {
+        leagueData[teamId].points[player] = parseInt(val) || 0;
+    }
+
+    function saveToStorage() {
+        localStorage.setItem('iplPoints', JSON.stringify(leagueData));
+        alert("Success! Points updated for the whole league.");
+    }
+
+    renderPlayers();
+</script>
+
+</body>
+</html>
