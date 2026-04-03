@@ -2,166 +2,142 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>IPL 2026 Full League Rosters</title>
+    <title>IPL 2026 Fantasy - Live Rosters</title>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
     <style>
         body { background-color: #0f172a; color: white; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 20px; }
-        .container { max-width: 1000px; margin: auto; }
-        h1 { text-align: center; color: #fbbf24; text-transform: uppercase; letter-spacing: 2px; }
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; }
-        .team-box { background: #1e293b; padding: 20px; border-radius: 12px; border: 1px solid #334155; }
-        h2 { color: #fbbf24; margin-top: 0; font-size: 1.4rem; border-bottom: 1px solid #334155; padding-bottom: 10px; }
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.9rem; }
-        th, td { padding: 8px; text-align: left; border-bottom: 1px solid #334155; }
+        .container { max-width: 1100px; margin: auto; }
+        h1 { text-align: center; color: #fbbf24; text-transform: uppercase; letter-spacing: 2px; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); }
+        .status-bar { text-align: center; background: #1e293b; padding: 10px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #334155; color: #22c55e; font-weight: bold; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; }
+        .team-box { background: #1e293b; padding: 20px; border-radius: 12px; border: 1px solid #334155; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
+        h2 { color: #fbbf24; margin-top: 0; font-size: 1.3rem; border-bottom: 1px solid #334155; padding-bottom: 10px; display: flex; justify-content: space-between; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { padding: 10px; text-align: left; border-bottom: 1px solid #334155; }
         th { color: #94a3b8; text-transform: uppercase; font-size: 0.75rem; }
-        input { background: #0f172a; color: #22c55e; border: 1px solid #334155; padding: 4px; border-radius: 4px; width: 50px; font-weight: bold; }
-        .total-row { background: #0f172a; font-weight: bold; color: #fbbf24; }
+        .player-pts { color: #22c55e; font-weight: bold; font-size: 1.1rem; }
+        .total-row { background: #0f172a; font-weight: bold; color: #fbbf24; font-size: 1.1rem; }
         .note { font-size: 0.75rem; color: #64748b; font-style: italic; margin-top: 10px; }
-        @media (max-width: 800px) { .grid { grid-template-columns: 1fr; } }
+        @media (max-width: 850px) { .grid { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>IPL 2026 Fantasy League</h1>        
+    <h1>IPL 2026 Fantasy League</h1>
+    <div class="status-bar" id="sync-status">📡 Connecting to Live Database...</div>
 
     <div class="grid">
         <div class="team-box" data-team-id="manish">
-            <h2>Team @manishliftfx</h2>
+            <h2><span>@manishliftfx</span> <span class="res" id="total-manish">0</span></h2>
             <table>
-                <thead><tr><th>Player</th><th>Team</th><th>Pts</th></tr></thead>
-                <tbody>
-                    <tr><td>MS Dhoni</td><td>CSK</td><td><input type="number" value="0" class="pt" oninput="calc()"></td></tr>
-                    <tr><td>Jitesh Sharma</td><td>RCB</td><td><input type="number" value="0" class="pt" oninput="calc()"></td></tr>
-                    <tr><td>Rohit Sharma</td><td>MI</td><td><input type="number" value="0" class="pt" oninput="calc()"></td></tr>
-                    <tr><td>Travis Head</td><td>SRH</td><td><input type="number" value="0" class="pt" oninput="calc()"></td></tr>
-                    <tr><td>Suryakumar Yadav</td><td>MI</td><td><input type="number" value="0" class="pt" oninput="calc()"></td></tr>
-                    <tr><td>Shivam Dube</td><td>CSK</td><td><input type="number" value="0" class="pt" oninput="calc()"></td></tr>
-                    <tr><td>Sam Curran</td><td>RR</td><td><input type="number" value="0" class="pt" oninput="calc()"></td></tr>
-                    <tr><td>Ayush Badoni</td><td>LSG</td><td><input type="number" value="0" class="pt" oninput="calc()"></td></tr>
-                    <tr><td>Mitchell Starc</td><td>DC</td><td><input type="number" value="0" class="pt" oninput="calc()"></td></tr>
-                    <tr><td>Arshdeep Singh</td><td>PBKS</td><td><input type="number" value="0" class="pt" oninput="calc()"></td></tr>
-                    <tr><td>Noor Ahmed</td><td>CSK</td><td><input type="number" value="0" class="pt" oninput="calc()"></td></tr>
-                </tbody>
-                <tfoot><tr class="total-row" id="manishpoints"><td colspan="2">TOTAL</td><td class="res">0</td></tr></tfoot>
+                <thead><tr><th>Player</th><th>2026 Team</th><th>Pts</th></tr></thead>
+                <tbody id="body-manish"></tbody>
             </table>
-            <p class="note">No players from GT, KKR[cite: 12].</p>
+            <p class="note">Focus: CSK/MI Core</p>
         </div>
 
         <div class="team-box" data-team-id="riya">
-            <h2>Team @riyaseerviii</h2>
+            <h2><span>@riyaseerviii</span> <span class="res" id="total-riya">0</span></h2>
             <table>
-                <thead><tr><th>Player</th><th>Team</th><th>Pts</th></tr></thead>
-                <tbody>
-                    <tr><td>Phil Salt</td><td>RCB</td><td><input type="number" value="0" class="pt" oninput="calc()"></td></tr>
-                    <tr><td>Jos Buttler</td><td>GT</td><td><input type="number" value="0" class="pt" oninput="calc()"></td></tr>
-                    <tr><td>Virat Kohli</td><td>RCB</td><td><input type="number" value="0" class="pt" oninput="calc()"></td></tr>
-                    <tr><td>Shubman Gill</td><td>GT</td><td><input type="number" value="0" class="pt" oninput="calc()"></td></tr>
-                    <tr><td>Rajat Patidar</td><td>RCB</td><td><input type="number" value="0" class="pt" oninput="calc()"></td></tr>
-                    <tr><td>Liam Livingstone</td><td>RCB</td><td><input type="number" value="0" class="pt" oninput="calc()"></td></tr>
-                    <tr><td>Glenn Maxwell</td><td>PBKS</td><td><input type="number" value="0" class="pt" oninput="calc()"></td></tr>
-                    <tr><td>Marcus Stoinis</td><td>LSG</td><td><input type="number" value="0" class="pt" oninput="calc()"></td></tr>
-                    <tr><td>Mohammed Siraj</td><td>GT</td><td><input type="number" value="0" class="pt" oninput="calc()"></td></tr>
-                    <tr><td>Josh Hazlewood</td><td>RCB</td><td><input type="number" value="0" class="pt" oninput="calc()"></td></tr>
-                    <tr><td>Pat Cummins</td><td>SRH</td><td><input type="number" value="0" class="pt" oninput="calc()"></td></tr>
-                </tbody>
-                <tfoot><tr class="total-row" id="riyapoints "><td colspan="2">TOTAL</td><td class="res">0</td></tr></tfoot>
+                <thead><tr><th>Player</th><th>2026 Team</th><th>Pts</th></tr></thead>
+                <tbody id="body-riya"></tbody>
             </table>
-            <p class="note">No players from MI, CSK, DC, KKR[cite: 19].</p>
+            <p class="note">Focus: RCB/GT Powerhouse</p>
         </div>
 
         <div class="team-box" data-team-id="bharat">
-            <h2>Team @bharath_k_sirvi</h2>
+            <h2><span>@bharath_k_sirvi</span> <span class="res" id="total-bharat">0</span></h2>
             <table>
-                <thead><tr><th>Player</th><th>Team</th><th>Pts</th></tr></thead>
-                <tbody>
-                    <tr><td>Sanju Samson</td><td>RR</td><td><input type="number" value="0" class="pt" oninput="calc()"></td></tr>
-                    <tr><td>Dhruv Jurel</td><td>RR</td><td><input type="number" value="0" class="pt" oninput="calc()"></td></tr>
-                    <tr><td>Andre Russell</td><td>KKR</td><td><input type="number" value="0" class="pt" oninput="calc()"></td></tr>
-                    <tr><td>Sunil Narine</td><td>KKR</td><td><input type="number" value="0" class="pt" oninput="calc()"></td></tr>
-                    <tr><td>Ravindra Jadeja</td><td>CSK</td><td><input type="number" value="0" class="pt" oninput="calc()"></td></tr>
-                    <tr><td>Shreyas Iyer</td><td>PBKS</td><td><input type="number" value="0" class="pt" oninput="calc()"></td></tr>
-                    <tr><td>Vaibhav Suryavanshi</td><td>RR</td><td><input type="number" value="0" class="pt" oninput="calc()"></td></tr>
-                    <tr><td>Deepak Chahar</td><td>CSK</td><td><input type="number" value="0" class="pt" oninput="calc()"></td></tr>
-                    <tr><td>Avesh Khan</td><td>LSG</td><td><input type="number" value="0" class="pt" oninput="calc()"></td></tr>
-                    <tr><td>Yash Dayal</td><td>RCB</td><td><input type="number" value="0" class="pt" oninput="calc()"></td></tr>
-                    <tr><td>Rinku Singh</td><td>KKR</td><td><input type="number" value="0" class="pt" oninput="calc()"></td></tr>
-                </tbody>
-                <tfoot><tr class="total-row" id="bharatpoints"><td colspan="2">TOTAL</td><td class="res">0</td></tr></tfoot>
+                <thead><tr><th>Player</th><th>2026 Team</th><th>Pts</th></tr></thead>
+                <tbody id="body-bharat"></tbody>
             </table>
-            <p class="note">No players from MI, DC, SRH, GT[cite: 29].</p>
+            <p class="note">Focus: RR/KKR Balanced</p>
         </div>
 
         <div class="team-box" data-team-id="naresh">
-            <h2>Team @naresh.og</h2>
+            <h2><span>@naresh.og</span> <span class="res" id="total-naresh">0</span></h2>
             <table>
-                <thead><tr><th>Player</th><th>Team</th><th>Pts</th></tr></thead>
-                <tbody>
-                    <tr><td>KL Rahul</td><td>DC</td><td><input type="number" value="0" class="pt" oninput="calc()"></td></tr>
-                    <tr><td>Ishan Kishan</td><td>SRH</td><td><input type="number" value="0" class="pt" oninput="calc()"></td></tr>
-                    <tr><td>Yashasvi Jaiswal</td><td>RR</td><td><input type="number" value="0" class="pt" oninput="calc()"></td></tr>
-                    <tr><td>Sai Sudharsan</td><td>GT</td><td><input type="number" value="0" class="pt" oninput="calc()"></td></tr>
-                    <tr><td>Abhishek Sharma</td><td>SRH</td><td><input type="number" value="0" class="pt" oninput="calc()"></td></tr>
-                    <tr><td>Hardik Pandya</td><td>MI</td><td><input type="number" value="0" class="pt" oninput="calc()"></td></tr>
-                    <tr><td>Mitchell Marsh</td><td>DC</td><td><input type="number" value="0" class="pt" oninput="calc()"></td></tr>
-                    <tr><td>Nitish Kumar Reddy</td><td>SRH</td><td><input type="number" value="0" class="pt" oninput="calc()"></td></tr>
-                    <tr><td>Varun Chakravarthy</td><td>KKR</td><td><input type="number" value="0" class="pt" oninput="calc()"></td></tr>
-                    <tr><td>Prasidh Krishna</td><td>GT</td><td><input type="number" value="0" class="pt" oninput="calc()"></td></tr>
-                    <tr><td>Mitchell Santner</td><td>MI</td><td><input type="number" value="0" class="pt" oninput="calc()"></td></tr>
-                </tbody>
-                <tfoot><tr class="total-row" id="nareshpoints"><td colspan="2">TOTAL</td><td class="res">0</td></tr></tfoot>
+                <thead><tr><th>Player</th><th>2026 Team</th><th>Pts</th></tr></thead>
+                <tbody id="body-naresh"></tbody>
             </table>
-            <p class="note">No players from CSK, RCB, PBKS, LSG[cite: 41].</p>
+            <p class="note">Focus: SRH/DC/MI Attack</p>
         </div>
     </div>
 </div>
 
 <script>
-    function calc() {
-        const boxes = document.querySelectorAll('.team-box');
-        boxes.forEach(box => {
-            let sum = 0;
-            const inputs = box.querySelectorAll('.pt');
-            inputs.forEach(i => sum += parseInt(i.value) || 0);
-            box.querySelector('.res').innerText = sum;
-        });
-    }
-    function loadAndCalc() {
-        // 1. Get data from local storage
-        const savedData = JSON.parse(localStorage.getItem('iplPoints'));
-        
-        if (savedData) {
-            // 2. Loop through every team box in the HTML
-            const boxes = document.querySelectorAll('.team-box');
+    // 1. Firebase Config
+    const firebaseConfig = {
+        apiKey: "AIzaSyCbi0WNJ50ozEULhw0Y9CdduToqS6vjwfs",
+        authDomain: "ipl-fanatsy2026.firebaseapp.com",
+        databaseURL: "https://ipl-fanatsy2026-default-rtdb.firebaseio.com",
+        projectId: "ipl-fanatsy2026",
+        storageBucket: "ipl-fanatsy2026.firebasestorage.app",
+        messagingSenderId: "208669133253",
+        appId: "1:208669133253:web:e740547c1a4623d798a3ac"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    // 2. Updated 2026 Roster Data
+    const rosters = {
+        "manish": [
+            {n: "MS Dhoni", t: "CSK"}, {n: "Jitesh Sharma", t: "RCB"}, {n: "Rohit Sharma", t: "MI"},
+            {n: "Travis Head", t: "SRH"}, {n: "Suryakumar Yadav", t: "MI"}, {n: "Shivam Dube", t: "CSK"},
+            {n: "Sam Curran", t: "RR"}, {n: "Ayush Badoni", t: "LSG"}, {n: "Mitchell Starc", t: "DC"},
+            {n: "Arshdeep Singh", t: "PBKS"}, {n: "Noor Ahmed", t: "CSK"}
+        ],
+        "riya": [
+            {n: "Phil Salt", t: "RCB"}, {n: "Jos Buttler", t: "GT"}, {n: "Virat Kohli", t: "RCB"},
+            {n: "Shubman Gill", t: "GT"}, {n: "Rajat Patidar", t: "RCB"}, {n: "Liam Livingstone", t: "RCB"},
+            {n: "Glenn Maxwell", t: "PBKS"}, {n: "Marcus Stoinis", t: "LSG"}, {n: "Mohammed Siraj", t: "GT"},
+            {n: "Josh Hazlewood", t: "RCB"}, {n: "Pat Cummins", t: "SRH"}
+        ],
+        "bharat": [
+            {n: "Sanju Samson", t: "RR"}, {n: "Dhruv Jurel", t: "RR"}, {n: "Andre Russell", t: "KKR"},
+            {n: "Sunil Narine", t: "KKR"}, {n: "Ravindra Jadeja", t: "CSK"}, {n: "Shreyas Iyer", t: "PBKS"},
+            {n: "Vaibhav Suryavanshi", t: "RR"}, {n: "Deepak Chahar", t: "CSK"}, {n: "Avesh Khan", t: "LSG"},
+            {n: "Yash Dayal", t: "RCB"}, {n: "Rinku Singh", t: "KKR"}
+        ],
+        "naresh": [
+            {n: "KL Rahul", t: "DC"}, {n: "Ishan Kishan", t: "SRH"}, {n: "Yashasvi Jaiswal", t: "RR"},
+            {n: "Sai Sudharsan", t: "GT"}, {n: "Abhishek Sharma", t: "SRH"}, {n: "Hardik Pandya", t: "MI"},
+            {n: "Mitchell Marsh", t: "DC"}, {n: "Nitish Kumar Reddy", t: "SRH"}, {n: "Varun Chakravarthy", t: "KKR"},
+            {n: "Prasidh Krishna", t: "GT"}, {n: "Mitchell Santner", t: "MI"}
+        ]
+    };
+
+    // 3. Sync Logic
+    db.ref('ipl_points').on('value', (snapshot) => {
+        const liveData = snapshot.val() || {};
+        document.getElementById('sync-status').innerText = "✅ Live: Data Synced with Admin";
+
+        Object.keys(rosters).forEach(teamId => {
+            const tbody = document.getElementById(`body-${teamId}`);
+            const totalDisplay = document.getElementById(`total-${teamId}`);
+            let teamTotal = 0;
             
-            boxes.forEach(box => {
-                const teamId = box.getAttribute('data-team-id');
-                const teamInfo = savedData[teamId];
-                
-                if (teamInfo) {
-                    let teamTotal = 0;
-                    const rows = box.querySelectorAll('tbody tr');
-                    
-                    rows.forEach(row => {
-                        const playerName = row.cells[0].innerText;
-                        const input = row.querySelector('.pt');
-                        
-                        // Set the value from admin data
-                        const points = teamInfo.points[playerName] || 0;
-                        input.value = points;
-                        teamTotal += points;
-                    });
-                    
-                    // Update total display
-                    box.querySelector('.res').innerText = teamTotal;
-                }
+            tbody.innerHTML = ""; // Clear existing rows
+
+            rosters[teamId].forEach(player => {
+                const pName = player.n;
+                const pts = (liveData[teamId] && liveData[teamId][pName]) ? liveData[teamId][pName] : 0;
+                teamTotal += pts;
+
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${pName}</td>
+                        <td>${player.t}</td>
+                        <td class="player-pts">${pts}</td>
+                    </tr>
+                `;
             });
-        }
-    }
-
-    // Run this whenever the page opens
-    window.onload = loadAndCalc;
+            totalDisplay.innerText = teamTotal;
+        });
+    });
 </script>
-
-
 </body>
 </html>
