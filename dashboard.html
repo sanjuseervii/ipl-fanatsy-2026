@@ -1,66 +1,104 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>IPL 2026 Leaderboard</title>
+    <meta charset="UTF-8">
+    <title>IPL 2026 Live Leaderboard</title>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+
     <style>
-        body { background-color: #0f172a; color: white; font-family: 'Arial'; text-align: center; }
-        table { width: 60%; margin: 50px auto; border-collapse: collapse; background: #1e293b; }
-        th, td { padding: 15px; border: 1px solid #334155; }
-        th { background-color: #eab308; color: black; }
+        body { background-color: #0f172a; color: white; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; text-align: center; padding: 20px; }
+        .header { margin-bottom: 30px; }
+        h1 { color: #fbbf24; text-transform: uppercase; letter-spacing: 2px; }
+        
+        table { width: 90%; max-width: 800px; margin: 20px auto; border-collapse: collapse; background: #1e293b; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3); }
+        th { background-color: #fbbf24; color: #0f172a; padding: 18px; text-transform: uppercase; font-size: 0.9rem; }
+        td { padding: 15px; border-bottom: 1px solid #334155; font-size: 1.1rem; }
+        tr:last-child td { border-bottom: none; }
+        tr:hover { background: #334155; cursor: pointer; transition: 0.3s; }
+        
+        .rank-1 { color: #fbbf24; font-weight: bold; } /* Gold color for winner */
+        .points { color: #22c55e; font-weight: bold; }
+        
+        .loading { font-style: italic; color: #94a3b8; }
     </style>
 </head>
 <body>
 
-    <h1>IPL 2026 POINTS TABLE</h1>
+    <div class="header">
+        <h1>🏆 IPL 2026 Points Table 🏆</h1>
+        <p id="status" class="loading">Fetching live scores...</p>
+    </div>
 
     <table>
         <thead>
             <tr>
-                <th>s.no</th>
-                <th>User</th>
-           
+                <th>Rank</th>
+                <th>Player / User</th>
+                <th>Total Points</th>
             </tr>
-            </thead>
-            <tr>
-                <td> 1</td>
-                <td class="team" data-team-id="riya">riyaa</td>
-            
-            </tr>
-            <tr>
-                <td> 2</td>
-                <td class="team" data-team-id="manish">manish</td>
-             
-            </tr>
-            <tr>
-                <td>3</td>
-                <td class="team" data-team-id="naruu">naresh</td>
-          
-            </tr>
-            <tr><td>4</td>
-                <td class="team" data-team-id="bharat">bharat</td>
-
-                </tr>   
+        </thead>
+        <tbody id="leaderboard-body">
+            </tbody>
     </table>
 
-
-
-
 <script>
-  // Select all elements with class 'team'
-  const teamButtons = document.querySelectorAll('.team');
+    // 2. Aapka Firebase Configuration (Vahi jo Admin page mein hai)
+    const firebaseConfig = {
+        apiKey: "AIzaSyCbi0WNJ50ozEULhw0Y9CdduToqS6vjwfs",
+        authDomain: "ipl-fanatsy2026.firebaseapp.com",
+        databaseURL: "https://ipl-fanatsy2026-default-rtdb.firebaseio.com",
+        projectId: "ipl-fanatsy2026",
+        storageBucket: "ipl-fanatsy2026.firebasestorage.app",
+        messagingSenderId: "208669133253",
+        appId: "1:208669133253:web:e740547c1a4623d798a3ac",
+        measurementId: "G-PQ8FBSBSKV"
+    };
 
-  teamButtons.forEach(button => {
-    button.addEventListener('click', () => {
-     
-      const teamId = button.getAttribute('data-team-id');
-      
-      window.location.href = `teams.html#${teamId}`;
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    // 3. Admin Names Mapping (UI ke liye)
+    const adminNames = {
+        "manish": "@manishliftfx",
+        "riya": "@riyaseerviii",
+        "bharat": "@bharath_k_sirvi",
+        "naresh": "@naresh.og"
+    };
+
+    // 4. Live Data Fetching
+    const tableBody = document.getElementById('leaderboard-body');
+    const statusText = document.getElementById('status');
+
+    db.ref('leaderboard').on('value', (snapshot) => {
+        const data = snapshot.val();
+        statusText.innerText = "Live Updates Active ✅";
+        
+        if (data) {
+            // Data ko array mein convert karke sort karo (Highest points first)
+            const sortedData = Object.entries(data).sort((a, b) => b[1] - a[1]);
+
+            tableBody.innerHTML = ""; // Purana data saaf karo
+
+            sortedData.forEach(([teamId, totalPoints], index) => {
+                const row = document.createElement('tr');
+                
+                // Click par team page par bhejne ke liye
+                row.onclick = () => window.location.href = `teams.html#${teamId}`;
+
+                row.innerHTML = `
+                    <td class="${index === 0 ? 'rank-1' : ''}">${index + 1}</td>
+                    <td>${adminNames[teamId] || teamId}</td>
+                    <td class="points">${totalPoints}</td>
+                `;
+                tableBody.appendChild(row);
+            });
+        } else {
+            tableBody.innerHTML = "<tr><td colspan='3'>No data available yet. Update from Admin!</td></tr>";
+        }
     });
-  });
-
-
 </script>
 
-    
 </body>
 </html>

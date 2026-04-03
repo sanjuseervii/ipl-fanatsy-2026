@@ -2,17 +2,21 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>IPL Admin Dashboard</title>
+    <title>IPL Admin - Firebase Sync</title>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+
     <style>
         body { background-color: #0f172a; color: white; font-family: 'Segoe UI', sans-serif; padding: 20px; }
         .container { max-width: 600px; margin: auto; background: #1e293b; padding: 25px; border-radius: 12px; border: 1px solid #334155; }
         h1 { color: #fbbf24; text-align: center; }
         .select-group { margin-bottom: 20px; }
-        select { width: 100%; padding: 10px; background: #0f172a; color: white; border: 1px solid #fbbf24; border-radius: 6px; }
-        .player-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #334155; }
-        input { background: #0f172a; color: #22c55e; border: 1px solid #334155; padding: 8px; border-radius: 4px; width: 80px; text-align: center; font-size: 1rem; }
-        .save-btn { width: 100%; background: #22c55e; color: white; border: none; padding: 15px; margin-top: 20px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 1.1rem; }
-        .save-btn:hover { background: #16a34a; }
+        select { width: 100%; padding: 12px; background: #0f172a; color: white; border: 1px solid #fbbf24; border-radius: 6px; font-size: 1rem; }
+        .player-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #334155; }
+        input { background: #0f172a; color: #22c55e; border: 1px solid #334155; padding: 8px; border-radius: 4px; width: 80px; text-align: center; font-size: 1rem; font-weight: bold; }
+        .save-btn { width: 100%; background: #fbbf24; color: #0f172a; border: none; padding: 15px; margin-top: 20px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 1.1rem; }
+        .save-btn:hover { background: #f59e0b; }
+        .status { text-align: center; margin-top: 10px; color: #94a3b8; font-size: 0.9rem; }
     </style>
 </head>
 <body>
@@ -25,20 +29,45 @@
         <select id="teamSelect" onchange="renderPlayers()"></select>
     </div>
 
-    <div id="playerList">
-        </div>
+    <div id="playerList"></div>
 
-    <button class="save-btn" onclick="saveToStorage()">Update League Points</button>
+    <button class="save-btn" onclick="saveToFirebase()">Sync with Firebase Leaderboard</button>
+    <div id="syncStatus" class="status">Connected to Firebase</div>
 </div>
 
 <script>
-    // 1. Database of players based on your HTML file
-    const leagueData = JSON.parse(localStorage.getItem('iplPoints')) || {
-        "manish": { name: "@manishliftfx", players: ["MS Dhoni", "Jitesh Sharma", "Rohit Sharma", "Travis Head", "Suryakumar Yadav", "Shivam Dube", "Sam Curran", "Ayush Badoni", "Mitchell Starc", "Arshdeep Singh", "Noor Ahmed"], points: {} },
-        "riya": { name: "@riyaseerviii", players: ["Phil Salt", "Jos Buttler", "Virat Kohli", "Shubman Gill", "Rajat Patidar", "Liam Livingstone", "Glenn Maxwell", "Marcus Stoinis", "Mohammed Siraj", "Josh Hazlewood", "Pat Cummins"], points: {} },
-        "bharat": { name: "@bharath_k_sirvi", players: ["Sanju Samson", "Dhruv Jurel", "Andre Russell", "Sunil Narine", "Ravindra Jadeja", "Shreyas Iyer", "Vaibhav Suryavanshi", "Deepak Chahar", "Avesh Khan", "Yash Dayal", "Rinku Singh"], points: {} },
-        "naresh": { name: "@naresh.og", players: ["KL Rahul", "Ishan Kishan", "Yashasvi Jaiswal", "Sai Sudharsan", "Abhishek Sharma", "Hardik Pandya", "Mitchell Marsh", "Nitish Kumar Reddy", "Varun Chakravarthy", "Prasidh Krishna", "Mitchell Santner"], points: {} }
+    // 2. Aapka Firebase Configuration 
+    const firebaseConfig = {
+        apiKey: "AIzaSyCbi0WNJ50ozEULhw0Y9CdduToqS6vjwfs",
+        authDomain: "ipl-fanatsy2026.firebaseapp.com",
+        databaseURL: "https://ipl-fanatsy2026-default-rtdb.firebaseio.com",
+        projectId: "ipl-fanatsy2026",
+        storageBucket: "ipl-fanatsy2026.firebasestorage.app",
+        messagingSenderId: "208669133253",
+        appId: "1:208669133253:web:e740547c1a4623d798a3ac",
+        measurementId: "G-PQ8FBSBSKV"
     };
+
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    // 3. Team Data Structure
+    const leagueData = {
+        "manish": { name: "@manishliftfx", players: ["MS Dhoni", "Jitesh Sharma", "Rohit Sharma", "Travis Head", "Suryakumar Yadav", "Shivam Dube", "Sam Curran", "Ayush Badoni", "Mitchell Starc", "Arshdeep Singh", "Noor Ahmed"] },
+        "riya": { name: "@riyaseerviii", players: ["Phil Salt", "Jos Buttler", "Virat Kohli", "Shubman Gill", "Rajat Patidar", "Liam Livingstone", "Glenn Maxwell", "Marcus Stoinis", "Mohammed Siraj", "Josh Hazlewood", "Pat Cummins"] },
+        "bharat": { name: "@bharath_k_sirvi", players: ["Sanju Samson", "Dhruv Jurel", "Andre Russell", "Sunil Narine", "Ravindra Jadeja", "Shreyas Iyer", "Vaibhav Suryavanshi", "Deepak Chahar", "Avesh Khan", "Yash Dayal", "Rinku Singh"] },
+        "naresh": { name: "@naresh.og", players: ["KL Rahul", "Ishan Kishan", "Yashasvi Jaiswal", "Sai Sudharsan", "Abhishek Sharma", "Hardik Pandya", "Mitchell Marsh", "Nitish Kumar Reddy", "Varun Chakravarthy", "Prasidh Krishna", "Mitchell Santner"] }
+    };
+
+    // Points store karne ke liye temporary object
+    let currentPoints = {};
+
+    // Initial Fetch: Firebase se existing points load karo
+    db.ref('ipl_points').on('value', (snapshot) => {
+        currentPoints = snapshot.val() || {};
+        renderPlayers();
+    });
 
     const teamSelect = document.getElementById('teamSelect');
     const playerList = document.getElementById('playerList');
@@ -53,27 +82,54 @@
 
     function renderPlayers() {
         const teamId = teamSelect.value;
-        const team = leagueData[teamId];
+        const players = leagueData[teamId].players;
         playerList.innerHTML = "";
 
-        team.players.forEach(player => {
-            const currentVal = team.points[player] || 0;
+        players.forEach(player => {
+            // Firebase data se value uthao ya 0 rakho
+            const currentVal = (currentPoints[teamId] && currentPoints[teamId][player]) ? currentPoints[teamId][player] : 0;
+            
             playerList.innerHTML += `
                 <div class="player-row">
                     <span>${player}</span>
-                    <input type="number" data-player="${player}" value="${currentVal}" oninput="updateLocalVal('${teamId}', '${player}', this.value)">
+                    <input type="number" value="${currentVal}" onchange="updateLocalVal('${teamId}', '${player}', this.value)">
                 </div>
             `;
         });
     }
 
     function updateLocalVal(teamId, player, val) {
-        leagueData[teamId].points[player] = parseInt(val) || 0;
+        if (!currentPoints[teamId]) currentPoints[teamId] = {};
+        currentPoints[teamId][player] = parseInt(val) || 0;
     }
 
-    function saveToStorage() {
-        localStorage.setItem('iplPoints', JSON.stringify(leagueData));
-        alert("Success! Points updated for the whole league.");
+    // Yeh hai apka naya calc() logic jo Firebase par data bhejta hai 
+    function saveToFirebase() {
+        const status = document.getElementById('syncStatus');
+        status.innerText = "Syncing...";
+
+        // 1. Har team ka total calculate karo
+        let teamTotals = {};
+        Object.keys(currentPoints).forEach(teamId => {
+            let total = 0;
+            Object.values(currentPoints[teamId]).forEach(pts => total += pts);
+            teamTotals[teamId] = total;
+        });
+
+        // 2. Firebase mein update karo: Player points aur Team totals dono!
+        const updates = {};
+        updates['/ipl_points'] = currentPoints;
+        updates['/leaderboard'] = teamTotals;
+
+        db.ref().update(updates)
+            .then(() => {
+                status.innerText = "All points synced to Live Dashboard!";
+                alert("Success! Points updated globally.");
+            })
+            .catch(err => {
+                status.innerText = "Error syncing data.";
+                console.error(err);
+            });
     }
 
     renderPlayers();
